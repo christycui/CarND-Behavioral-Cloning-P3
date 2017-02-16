@@ -32,7 +32,7 @@ def generator(samples, batch_size=32):
                 left_image = cv2.imread(path+batch_sample[1].strip())
                 right_image = cv2.imread(path+batch_sample[2].strip())
                 center_angle = float(batch_sample[3])
-                correction = 0.2
+                correction = 0.18
                 steering_left = center_angle + correction
                 steering_right = center_angle - correction
                 images.extend([center_image, left_image, right_image])
@@ -57,18 +57,19 @@ from keras.layers.convolutional import Convolution2D
 from keras.layers.pooling import MaxPooling2D
 from keras.layers import Lambda
 
-# trying out LeNet
 model = Sequential()
-model.add(Cropping2D(cropping=((50,20), (0,0)), input_shape=(160,320,3)))
+model.add(Cropping2D(cropping=((60,30), (0,0)), input_shape=(160,320,3)))
 model.add(Lambda(lambda x: (x / 255.0) - 0.5))
-model.add(Convolution2D(32, 5, 5))
+model.add(Convolution2D(32, 5, 5, activation='relu'))
 model.add(MaxPooling2D((5, 5)))
-model.add(Dropout(0.5))
+model.add(Dropout(0.75))
 model.add(Activation('relu'))
 model.add(Flatten())
+model.add(Dense(50))
+model.add(Dense(10))
 model.add(Dense(1))
 
 model.compile(optimizer='adam',loss='mse')
-model.fit_generator(train_generator, samples_per_epoch=len(train_samples), validation_data=validation_generator, nb_val_samples=len(validation_samples), nb_epoch=10)
+model.fit_generator(train_generator, samples_per_epoch=len(train_samples), validation_data=validation_generator, nb_val_samples=len(validation_samples), nb_epoch=20)
 
 model.save('model.h5')
