@@ -3,6 +3,7 @@ import base64
 from datetime import datetime
 import os
 import shutil
+import cv2
 
 import numpy as np
 import socketio
@@ -37,9 +38,9 @@ def telemetry(sid, data):
         min_speed = 8
         max_speed = 10
         if float(speed) < min_speed:
-            throttle = 1.0
+            throttle = 5
         elif float(speed) > max_speed:
-            throttle = -1.0
+            throttle = -5
         else:
             throttle = 0.1
         
