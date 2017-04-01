@@ -97,7 +97,7 @@ from keras.layers import Dense, Activation, Flatten, Cropping2D, Dropout
 from keras.layers.convolutional import Convolution2D
 from keras.layers.pooling import MaxPooling2D
 from keras.layers import Lambda, merge, Input
-from keras import backend
+from keras import backend as K
 
 row, col, ch = 480,960,3
 
@@ -113,10 +113,10 @@ branch_image = Flatten()(branch_image)
 
 input_speed = Input(shape=(1,),name='input_speed')
 
-output = backend.concatenate([branch_image, input_speed])
-output = Dense(2)(output)
+output = Lambda(lambda x: K.concatenate(x, axis=1))([branch_image, input_speed])
+output = Dense(2,name='output')(output)
 
-model =  Model(input = [input_image, input_speed], output = output)
+model =  Model((input_image, input_speed), output)
 
 model.compile(optimizer='adam',loss='mse')
 model.fit_generator(train_generator, samples_per_epoch=len(train_samples), validation_data=validation_generator, nb_val_samples=len(validation_samples), nb_epoch=3)
