@@ -35,27 +35,31 @@ def generator(samples, batch_size=32):
       batch_samples = samples[offset:offset+batch_size]
 
       images = []
-      angles = []
+      output = []
       for batch_sample in batch_samples:
-        center_angle = float(batch_sample[3])
-        center_image = cv2.cvtColor(cv2.imread(batch_sample[0]),cv2.COLOR_BGR2RGB)
+        center_angle = float(batch_sample[11])
+        if center_angle == 0:
+          continue
+        throttle = float(batch_sample[12])
+        brake = float(batch_sample[13])
+        if brake > 0:
+          throttle = -brake
+        filepath = open(path+batch_sample[0],'rb')
+        img = np.array(Image.frombytes('RGB',[960,480],filepath.read(),'raw'))
+        img = cv2.resize(img, (160, 320))
+        center_image = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
         center_image_T = adjust_brightness(center_image)
-        left_image = cv2.cvtColor(cv2.imread(batch_sample[1].strip()),cv2.COLOR_BGR2RGB)
-        left_image_T = adjust_brightness(left_image)
-        right_image = cv2.cvtColor(cv2.imread(batch_sample[2].strip()),cv2.COLOR_BGR2RGB)
-        right_image_T = adjust_brightness(right_image)
+
         
-        correction = 0.25
-        steering_left = center_angle + correction
-        steering_right = center_angle - correction
-        images.extend([center_image, center_image_T, left_image, left_image_T, right_image, right_image_T])
-        angles.extend([center_angle, center_angle, steering_left, steering_left, steering_right, steering_right])
+        single_output = [center_angle,throttle]
+        images.extend([center_image, center_image_T])
+        output.extend([single_output, single_output])
 
       X_train = np.array(images)
-      y_train = np.array(angles).reshape([-1,1])
+      y_train = np.array(output).reshape([-1,2])
       # add flipped images and angles to avoid bias
       images_flipped = np.fliplr(X_train)
-      angles_flipped = np.negative(y_train)
+      angles_flipped = np.array([[-angle,throttle] for [angle,throttle] in output]).reshape([-1,2])
       X_train = np.concatenate((X_train, images_flipped), axis=0)
       y_train = np.concatenate((y_train, angles_flipped), axis=0)
       yield sklearn.utils.shuffle(X_train, y_train)
@@ -73,7 +77,7 @@ from keras.models import Sequential, load_model
 from keras.layers import Dense, Activation, Flatten, Cropping2D, Dropout
 from keras.layers.convolutional import Convolution2D
 from keras.layers.pooling import MaxPooling2D
-from keras.layers import Lambda
+from keras.layers import Lambda, Merge
 
 row, col, ch = 160,320,3
 
