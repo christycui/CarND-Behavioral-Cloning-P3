@@ -95,7 +95,7 @@ input_speed = Input()
 
 input_gps = Input(shape=(1,2))
 
-output = merge([branch_image, input_speed, input_gps], mode='concat', concat_axis=1)
+output = Merge([branch_image, input_speed, input_gps], mode='concat', concat_axis=1)
 output = Dense(2)(output)
 
 model =  Model(input = [input_image, input_speed, input_gps], output = [output])
