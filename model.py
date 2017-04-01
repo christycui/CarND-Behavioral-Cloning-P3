@@ -18,6 +18,11 @@ import random
 #    samples.append(line)
 #  for row in reader_2:
 #    samples.append(line)
+samples = []
+with open('./driving_log.csv') as csvfile:
+    reader = csv.reader(csvfile)
+    for line in reader:
+        samples.append(line)
 
 from sklearn.model_selection import train_test_split
 train_samples, validation_samples = train_test_split(samples, test_size=0.2)
