@@ -50,9 +50,6 @@ def generator(samples, batch_size=32):
         longitude = float(batch_sample[2])
         latitude = float(batch_sample[3])
 
-        point = LatLontoUTM(longitude,latitude)
-        cte = NearestWayPointCTEandDistance(point)
-
         if brake > 0:
           throttle = -brake
 
@@ -61,11 +58,10 @@ def generator(samples, batch_size=32):
         #single_input = input_all.append(np.array([center_image,speed,CTE]))
         center_image_T = adjust_brightness(center_image)
         images.extend([center_image, center_image_T])
+        print(len(images))
         #images = np.array(images)
 
         speed_input.extend([speed,speed])
-
-        cte_input.extend([cte,cte])
 
 
         single_output = [center_angle,throttle]
