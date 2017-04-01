@@ -8,16 +8,16 @@ import cv2
 import sklearn
 import random
 
-path = '/Users/Christy/Desktop/'
-samples = []
-with open('driving_log.csv','r') as log_1, open(path+'driving_log.csv','r') as log_2:
-  reader_1 = csv.reader(log_1)
-  reader_2 = csv.reader(log_2)
-  next(reader_1, None)
-  for line in reader_1:
-    samples.append(line)
-  for row in reader_2:
-    samples.append(line)
+#path = '/Users/Christy/Desktop/'
+#samples = []
+#with open('driving_log.csv','r') as log_1, open(path+'driving_log.csv','r') as log_2:
+#  reader_1 = csv.reader(log_1)
+#  reader_2 = csv.reader(log_2)
+#  next(reader_1, None)
+#  for line in reader_1:
+#    samples.append(line)
+#  for row in reader_2:
+#    samples.append(line)
 
 from sklearn.model_selection import train_test_split
 train_samples, validation_samples = train_test_split(samples, test_size=0.2)
@@ -70,16 +70,26 @@ from keras.layers.convolutional import Convolution2D
 from keras.layers.pooling import MaxPooling2D
 from keras.layers import Lambda
 
-model = Sequential()
-model.add(Cropping2D(cropping=((60,30), (0,0)), input_shape=(160,320,3)))
-model.add(Lambda(lambda x: (x / 255.0) - 0.5))
-model.add(Convolution2D(24, 5, 5, subsample=(2,2), activation='relu'))
-model.add(Convolution2D(36, 5, 5, subsample=(2,2), activation='relu'))
-model.add(Convolution2D(48, 5, 5, subsample=(2,2), activation='relu'))
-model.add(Convolution2D(64, 3, 3, activation='relu'))
-model.add(Convolution2D(64, 3, 3, activation='relu'))
-model.add(Flatten())
-model.add(Dense(1))
+row, col, ch = 160,320,3
+
+input_image = Input(shape=(row,col,ch))
+branch_image = Cropping2D(cropping=((60,30), (0,0)), input_shape=(row, col, ch))(input_image)
+branch_image = Lambda(lambda x: (x / 255.0) - 0.5)(branch_image)
+branch_image = Convolution2D(24, 5, 5, subsample=(2,2), activation='relu')(branch_image)
+branch_image = Convolution2D(36, 5, 5, subsample=(2,2), activation='relu')(branch_image)
+branch_image = Convolution2D(48, 5, 5, subsample=(2,2), activation='relu')(branch_image)
+branch_image = Convolution2D(64, 3, 3, activation='relu')(branch_image)
+branch_image = Convolution2D(64, 3, 3, activation='relu')(branch_image)
+branch_image = Flatten()(branch_image)
+
+input_speed = Input()
+
+input_gps = Input(shape=(1,2))
+
+output = merge([branch_image, input_speed, input_gps], mode='concat', concat_axis=1)
+output = Dense(2)(output)
+
+model =  Model(input = [input_image, input_speed, input_gps], output = [output])
 
 model.compile(optimizer='adam',loss='mse')
 model.fit_generator(train_generator, samples_per_epoch=len(train_samples), validation_data=validation_generator, nb_val_samples=len(validation_samples), nb_epoch=3)
