@@ -59,7 +59,7 @@ def generator(samples, batch_size=32):
       angles_flipped = np.array([[-angle,throttle] for [angle,throttle] in output]).reshape([-1,2])
       X_train = np.concatenate((X_train, images_flipped), axis=0)
       y_train = np.concatenate((y_train, angles_flipped), axis=0)
-      yield sklearn.utils.shuffle(X_train, y_train)""
+      yield sklearn.utils.shuffle(X_train, y_train)
 
 def adjust_brightness(image):
     rand = random.uniform(0.4, 1.5)

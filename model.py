@@ -77,7 +77,7 @@ from keras.models import Sequential, load_model
 from keras.layers import Dense, Activation, Flatten, Cropping2D, Dropout
 from keras.layers.convolutional import Convolution2D
 from keras.layers.pooling import MaxPooling2D
-from keras.layers import Lambda, Merge
+from keras.layers import Lambda, merge
 
 row, col, ch = 160,320,3
 
@@ -95,7 +95,7 @@ input_speed = Input()
 
 input_gps = Input(shape=(1,2))
 
-output = Merge([branch_image, input_speed, input_gps], mode='concat', concat_axis=1)
+output = merge([branch_image, input_speed, input_gps], mode='concat', concat_axis=1)
 output = Dense(2)(output)
 
 model =  Model(input = [input_image, input_speed, input_gps], output = [output])
