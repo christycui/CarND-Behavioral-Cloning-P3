@@ -35,20 +35,26 @@ def telemetry(sid, data):
         imgString = data["image"]
         image = Image.open(BytesIO(base64.b64decode(imgString)))
         image_array = np.asarray(image)
-        image_array = image_array.resize(image_array,(320,160))[::-1,:,:]
+        image_array = image_array.resize(image_array,(480,960,3))
         print(model.predict(image_array[None, :, :, :], batch_size=1))
         output = model.predict(image_array[None, :, :, :], batch_size=1)
         steering_angle = output[0][0]
         throttle = output[0][1]
 
         min_speed = 8
-        max_speed = 50
+        max_speed = 30
 
-        if float(speed) > 25:
+        if float(speed) > max_speed:
             throttle = 0
 
-        if steering_angle > 0.2 or steering_angle < -0.2:
+        if steering_angle > 0.2*6.28 or steering_angle < -0.2*6.28:
             throttle = -throttle
+        
+
+        brake=0
+        if throttle<0:
+            throttle=0
+            brake=np.abs(throttle)
 
         print(output)
         print(steering_angle)

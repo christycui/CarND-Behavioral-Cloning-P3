@@ -11,9 +11,9 @@ import utm
 
 # read in from different folders
 #path = "/Volumes/TOSHIBA EXT/"
-path = "/Volumes/Macintosh HD/Users/Christy/Desktop/1543/"
+path = "/Volumes/TOSHIBA EXT/thunderhill-day1-data/1538/"
 slow = 'thunderhill-day1-data/1543/'
-medium = [1538,1610,1620,1645,1702,1708]
+# medium = ['1538','1610','1620','1645','1702','1708']
 samples = []
 with open(path+'output_processed.txt','r') as log_1:
   reader_1 = csv.reader(log_1)
@@ -119,6 +119,6 @@ output = Dense(2,name='output')(output)
 model =  Model((input_image, input_speed), output)
 
 model.compile(optimizer='adam',loss='mse')
-model.fit_generator(train_generator, samples_per_epoch=len(train_samples), validation_data=validation_generator, nb_val_samples=len(validation_samples), nb_epoch=3)
+model.fit_generator(train_generator, samples_per_epoch=len(train_samples), validation_data=validation_generator, nb_val_samples=len(validation_samples), nb_epoch=20)
 
-model.save('thunderhill_slow.h5')
+model.save('thunderhill_med.h5')
